@@ -1,13 +1,15 @@
-from fastapi import FastAPI
-
-app = FastAPI()
-
-
-@app.post("/")
-async def root():
-    return {"Hello World"}
+import numpy as np
+import tf
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+def process(image):
+    data=np.asarray(image)
+    data=data/255.0
+    data=tf.image.resize(data,[224,224])
+    return data
+
+#Return Prediction Result
+def predict(tensor):
+    predictions=model(np.array([tensor]))
+    res=np.argmax(predictions)
+    return res
