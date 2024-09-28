@@ -1,37 +1,48 @@
-#Imports
-import os,io
+from _datetime import datetime
 import numpy as np
-from tensorflow import image
-import tensorflow_hub as hub
 from PIL import Image
-import keras
+from tensorflow.keras.preprocessing import image as keras_image
+from tensorflow.keras.models import load_model
 
-#Load Model Architecture with weights
-model = keras.models.load_model("garbage_classification_model_inception.h5", custom_objects={'KerasLayer': hub.KerasLayer})
+from Data.ResultService import Result_Service
+from Model.ResultDetection import ResultDetection
 
-#Process the image and return Tensor
-#Process the image and return Tensor
-def process(image):
-    image = image.resize((512, 384))  # Resize the image to the original size
-    data=np.asarray(image)
-    data=data/255.0
-    data=np.clip(data, 0, 1)  # Ensure values are within the valid range
-    return data
-#Return Prediction Result
-def predict(tensor):
-    predictions=model(np.array([tensor]))
-    res=np.argmax(predictions)
-    return res
 
-def index():
-    file_path = r"D:\Code\PBL4\Server_Backend_API\wwwroot\Images\reduce-paper-waste.jpg"
-    with open(file_path, 'rb') as file:
-        image_bytes=file.read()
-        image=Image.open(io.BytesIO(image_bytes))
-        tensor = process(image)
-        prediction=predict(tensor)
-        data={"prediction":int(prediction)}
-        print(data)
+# Hàm dự đoán loại rác
+def predict_waste_category(image_path, model):
+    # Load và xử lý ảnh
+    img = Image.open(image_path)
+    img = img.resize((384, 512))  # Điều chỉnh kích thước ảnh theo kích thước đầu vào của mô hình
+    img_array = keras_image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0  # Chuẩn hóa ảnh
 
-if __name__ == "__main__":
-    index()
+    # Dự đoán loại rác
+    prediction = model.predict(img_array)
+    waste_categories = [ 'glass', 'metal', 'paper', 'plastic']
+    predicted_category_index = np.argmax(prediction)
+    predicted_category = waste_categories[predicted_category_index]
+    # glass', 'metal', 'paper', 'plastic
+    # Lấy xác suất dự đoán của loại rác
+    probability = prediction[0][predicted_category_index]
+    return predicted_category, probability
+
+# Ví dụ sử dụng
+
+basePath = 'D:\\Code\\PBL4\\Server_Backend_API\\wwwroot\\Images\\'
+image_name = r"real.jpg"
+image_path = basePath+ image_name
+model_inception = load_model(r"D:\Code\PBL4\Server_Backend_API\GarbageDetection\garbage_classification_model_inception.h5")  # Load model đã lưu đúng cách
+predicted_category, probability = predict_waste_category(image_path, model_inception)
+
+result_detection = ResultDetection(
+    imageName=image_name,
+    result=predicted_category,
+    dateCreated = datetime.now()
+)
+
+result_service = Result_Service()
+
+result_service.insertResult(result_detection)
+
+print("Predicted waste category:", predicted_category)
+print("Probability:", probability)

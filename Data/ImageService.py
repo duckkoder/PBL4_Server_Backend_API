@@ -1,23 +1,34 @@
 import pyodbc
-from ConnectDb import ConnectDb
+from ConnectDataBase import Connect_Db
+from Model import ImageViewModel
 
-
-class ImageService:
+class Image_Service:
     def __init__(self):
-        self.dbContext = ConnectDb()  # dbContext là một instance của ConnectDb
+        self.dbContext = Connect_Db()  # dbContext là một instance của ConnectDb
         self.dbContext.connect()    # Kết nối tới cơ sở dữ liệu khi khởi tạo
 
     def get_Image(self, filePath):
         try:
-            query = "SELECT * FROM Images WHERE filePath = ?"
+            query = "SELECT dateCreated, filePath FROM Images WHERE filePath = ?"
             self.dbContext.cursor.execute(query, (filePath,))
-            result = self.dbContext.cursor.fetchall()  # Lấy tất cả kết quả trả về
-            return result  # Trả về kết quả
+            result = self.dbContext.cursor.fetchone()  # Lấy một kết quả duy nhất
+
+            if result is None:
+                print(f"Không tìm thấy hình ảnh với filePath: {filePath}")
+                return None
+
+            # Giả sử kết quả chứa 2 cột: dateCreated và filePath
+            date_created, file_path = result
+            image = ImageViewModel(
+                dateCreated=date_created,
+                filePath=file_path
+            )
+            return image
         except pyodbc.Error as e:
             print(f"Lỗi khi lấy Image: {e}")
             return None
 
-    def create_Image(self, filePath, dateCreated):
+    def insertImage(self, filePath, dateCreated):
         try:
             query = "INSERT INTO Images (filePath, dateCreated) VALUES (?, ?)"
             self.dbContext.cursor.execute(query, (filePath, dateCreated))
@@ -25,8 +36,8 @@ class ImageService:
             print("Insert Image thành công.")
         except pyodbc.Error as e:
             print(f"Lỗi khi Insert Image: {e}")
-        return None
-    def fetch_Images(self):
+
+    def fetchImages(self):
         try:
             query = "SELECT * FROM Images"
             self.dbContext.cursor.execute(query)
@@ -35,15 +46,16 @@ class ImageService:
         except pyodbc.Error as e:
             print(f"Lỗi khi lấy dữ liệu: {e}")
             return None
-    def delete_Image(self, filePath):
+
+    def deleteImage(self, filePath):
         try:
-            query = "DELETE FROM Images WHERE filePath=?"
-            self.dbContext.cursor.execute(query, (filePath))
+            query = "DELETE FROM Images WHERE filePath = ?"
+            self.dbContext.cursor.execute(query, (filePath,))
             self.dbContext.conn.commit()
-            print("Delete Image thành công.")
+            return True
         except pyodbc.Error as e:
             print(f"Lỗi khi Delete Image: {e}")
-            return None
+            return False
 
     def close(self):
         if self.dbContext.cursor:

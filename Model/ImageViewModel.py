@@ -1,8 +1,8 @@
 from datetime import datetime
-from pydantic import BaseModel, FilePath
+from pydantic import BaseModel
 
 class ImageViewModel(BaseModel):
-    dateReceived: datetime
-    images: FilePath
+    dateCreated: datetime
+    filePath: str
 
 

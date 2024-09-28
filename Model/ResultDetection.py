@@ -1,7 +1,7 @@
 from datetime import datetime
-from pydantic import BaseModel, FilePath
+from pydantic import BaseModel
 
 class ResultDetection(BaseModel):
-    dateCreate: datetime
-    images: FilePath
+    dateCreated: datetime
+    imageName: str
     result: str

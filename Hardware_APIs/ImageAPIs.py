@@ -1,7 +1,9 @@
 import uuid
+
+from arrow import now
 from fastapi import FastAPI, UploadFile, File
 import os
-
+from Data import ImageService
 app = FastAPI()
 
 
@@ -22,6 +24,9 @@ async def upload_file(file: UploadFile = File(...)):
     os.makedirs(imageDir, exist_ok=True)
 
     file_path = os.path.join(imageDir, file.filename)
+
+    ImageService.ImageService.insertImage(file.filename,now)
+
 
     with open(file_path, "wb") as f:
         f.write(contents)
