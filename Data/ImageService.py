@@ -63,3 +63,4 @@ class Image_Service:
         if self.dbContext.conn:
             self.dbContext.conn.close()
         print("Kết nối đã được đóng.")
+        # sad

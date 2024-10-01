@@ -29,7 +29,7 @@ def predict_waste_category(image_path, model):
 # Ví dụ sử dụng
 
 basePath = 'D:\\Code\\PBL4\\Server_Backend_API\\wwwroot\\Images\\'
-image_name = r"real.jpg"
+image_name = r"a.jpg"
 image_path = basePath+ image_name
 model_inception = load_model(r"D:\Code\PBL4\Server_Backend_API\GarbageDetection\garbage_classification_model_inception.h5")  # Load model đã lưu đúng cách
 predicted_category, probability = predict_waste_category(image_path, model_inception)
@@ -46,3 +46,4 @@ result_service.insertResult(result_detection)
 
 print("Predicted waste category:", predicted_category)
 print("Probability:", probability)
+# sad

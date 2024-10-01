@@ -8,7 +8,7 @@ class Result_Service:
 
     def insertResult(self, resultDetection: ResultDetection):
         query = """
-        INSERT INTO ResultDetection (filePath, result, dateCreated)
+        INSERT INTO ResultDetection (imageName, result, dateCreated)
         VALUES (?, ?, ?)
         """
         values = (resultDetection.imageName, resultDetection.result, resultDetection.dateCreated)
@@ -33,3 +33,4 @@ class Result_Service:
             return None
         finally:
             self.dbContext.conn.close()
+# sad

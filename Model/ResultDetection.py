@@ -5,3 +5,4 @@ class ResultDetection(BaseModel):
     dateCreated: datetime
     imageName: str
     result: str
+# sad
